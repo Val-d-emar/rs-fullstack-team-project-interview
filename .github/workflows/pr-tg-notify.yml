@@ -1,3 +1,5 @@
+name: PR Notifier
+
 on:
   pull_request:
     types: [opened, ready_for_review, closed, review_requested, assigned]
