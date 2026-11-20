@@ -1,0 +1,35 @@
+on:
+  pull_request:
+    types: [opened, ready_for_review, closed, review_requested, assigned]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+
+jobs:
+  telegram_notify:
+    name: 📢 Telegram Notifier
+    runs-on: ubuntu-latest
+    concurrency:
+      group: notify-${{ github.event.pull_request.number }}-${{ github.event.action }}-${{ github.event.requested_reviewer.login || github.event.review.id || github.run_id }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Send Notification
+        uses: Val-d-emar/telegram-pr-notifications@v1
+        with:
+          bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat_id: ${{ secrets.TELEGRAM_GROUP_ID }}
+          user_map: ${{ secrets.TELEGRAM_USER_MAP }}
+          # формат секрета:
+          ####################################
+          # gh_nickname=telegram_nickname
+          # gh_nickname1=telegram_nickname2
+          # ...
+          # gh_nicknameN=telegram_nicknameN
+          ####################################
+          # gh_nickname - логин в гитхабе
+          # telegram_nickname - логин в телеграме
+          ignore_bots: 'false'
+          language: 'ru'

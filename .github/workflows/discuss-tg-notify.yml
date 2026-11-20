@@ -1,0 +1,27 @@
+name: Discussions Notifier
+
+on:
+  discussion_comment:
+    types: [created, edited]
+  discussion:
+    types: [created]
+
+permissions:
+  discussions: read
+  contents: read
+
+concurrency:
+  group: tg-notify-${{ github.event.action }}-${{ github.actor.login || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    name: 📢 Discussions Notifier
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Val-d-emar/discussions-tg-notifications@v1
+        with:
+          bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat_id: ${{ secrets.TELEGRAM_GROUP_ID }}
+          language: 'ru'
+          events: 'created,edited'
