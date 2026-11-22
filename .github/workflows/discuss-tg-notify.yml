@@ -19,7 +19,7 @@ jobs:
     name: 📢 Discussions Notifier
     runs-on: ubuntu-latest
     steps:
-      - uses: Val-d-emar/discussions-tg-notificatDiscussionsions@v1
+      - uses: Val-d-emar/discussions-tg-notifications@v1
         with:
           bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           chat_id: ${{ secrets.TELEGRAM_GROUP_ID }}
