@@ -1,0 +1,41 @@
+$navy: #101d36;
+$navy-soft: #1b2b49;
+$lemon: #eef5ae;
+$lemon-strong: #e1ec8c;
+$lemon-soft: #f8fbdc;
+
+$paper: #f6f7f2;
+$white: #fff;
+$ink: #17243b;
+$muted: #5d6879;
+$subtle: #8a93a1;
+$line: #e2e6da;
+$olive: #566626;
+$green: #3f6b4f;
+$green-soft: #e8f1e3;
+$danger: #b0383a;
+
+$radius-sm: 10px;
+$radius: 14px;
+$radius-lg: 22px;
+
+$shadow: 0 14px 40px rgba(16, 29, 54, 0.09);
+$shadow-lg: 0 24px 70px rgba(16, 29, 54, 0.22);
+
+$font: 'Manrope', 'Inter', Arial, sans-serif;
+
+$header-height: 72px;
+$bp-tablet: 1050px;
+$bp-mobile: 720px;
+
+@mixin tablet {
+  @media (max-width: $bp-tablet) {
+    @content;
+  }
+}
+
+@mixin mobile {
+  @media (max-width: $bp-mobile) {
+    @content;
+  }
+}
