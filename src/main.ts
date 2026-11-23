@@ -1,60 +1,123 @@
 import './styles/main.scss';
-import heroImg from './assets/hero.png';
-import typescriptLogo from './assets/typescript.svg';
-import viteLogo from './assets/vite.svg';
-import { setupCounter } from './counter.ts';
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${typescriptLogo}" class="framework" alt="TypeScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.ts</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+import { store } from './state/store';
+import type { PageId } from './types/store';
+import { renderFooter } from './ui/components/footer';
+import { renderHeader } from './ui/components/header';
+import { escapeHtml } from './ui/escapeHtml';
 
-<div class="ticks"></div>
+const PAGE_STUBS: Record<
+  PageId,
+  { title: string; description: string; nextPage: PageId; cta: string }
+> = {
+  about: {
+    title: 'О платформе BatumiLeads',
+    description: 'Стартовый раздел «О нас» будет реализован в задаче 2.2.',
+    nextPage: 'catalog',
+    cta: 'Перейти в каталог',
+  },
+  catalog: {
+    title: 'Каталог объектов Батуми',
+    description: 'Карточки лидов, поиск и фильтры будут реализованы в задачах 3.1 и 3.2.',
+    nextPage: 'cart',
+    cta: 'Открыть корзину',
+  },
+  cart: {
+    title: 'Корзина доступов',
+    description: 'Список выбранных контактов и промокоды будут реализованы в задачах 4.1 и 4.2.',
+    nextPage: 'about',
+    cta: 'Вернуться на главную',
+  },
+};
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://www.typescriptlang.org" target="_blank">
-          <img class="button-icon" src="${typescriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+const appElement = document.querySelector<HTMLDivElement>('#app');
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`;
+if (!appElement) {
+  throw new Error('App root element #app was not found');
+}
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!);
+const app: HTMLDivElement = appElement;
+let isMenuOpen = false;
+
+function isPageId(value: string | undefined): value is PageId {
+  return value === 'about' || value === 'catalog' || value === 'cart';
+}
+
+function renderPageStub(page: PageId): string {
+  const stub = PAGE_STUBS[page];
+
+  return `
+    <main class="page">
+      <section class="shell-stub">
+        <h1>${escapeHtml(stub.title)}</h1>
+        <p>${escapeHtml(stub.description)}</p>
+        <button class="button button-lemon" type="button" data-page="${stub.nextPage}">
+          ${escapeHtml(stub.cta)}
+        </button>
+      </section>
+    </main>`;
+}
+
+function render(): void {
+  const state = store.getState();
+  const cartCount = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  app.innerHTML = `
+    ${renderHeader(state.currentPage, cartCount, isMenuOpen)}
+    ${renderPageStub(state.currentPage)}
+    ${renderFooter()}
+  `;
+}
+
+function navigate(page: PageId): void {
+  const wasMenuOpen = isMenuOpen;
+
+  isMenuOpen = false;
+
+  if (store.getState().currentPage === page) {
+    if (wasMenuOpen) render();
+    return;
+  }
+
+  store.setPage(page);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function handleAppClick(event: MouseEvent): void {
+  const target = event.target;
+
+  if (!(target instanceof HTMLElement)) return;
+
+  const pageButton = target.closest<HTMLElement>('[data-page]');
+
+  if (pageButton && isPageId(pageButton.dataset.page)) {
+    event.preventDefault();
+    navigate(pageButton.dataset.page);
+    return;
+  }
+
+  if (target.closest('[data-menu-toggle]')) {
+    isMenuOpen = !isMenuOpen;
+    render();
+  }
+}
+
+function handleDocumentKeydown(event: KeyboardEvent): void {
+  if (event.key === 'Escape' && isMenuOpen) {
+    isMenuOpen = false;
+    render();
+  }
+}
+
+function handleImageError(event: Event): void {
+  if (event.target instanceof HTMLImageElement) {
+    event.target.remove();
+  }
+}
+
+store.subscribe(render);
+app.addEventListener('click', handleAppClick);
+document.addEventListener('keydown', handleDocumentKeydown);
+document.addEventListener('error', handleImageError, true);
+
+render();

@@ -1,0 +1,165 @@
+@use 'variables' as *;
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: $header-height;
+  padding: 0 clamp(20px, 5vw, 64px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: $navy;
+  color: $white;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 7px;
+  border: 1.5px solid rgba($lemon, 0.6);
+  border-radius: 11px;
+
+  span {
+    display: block;
+    width: 5px;
+    border-radius: 2px 2px 1px 1px;
+    background: $lemon;
+
+    &:nth-child(1) {
+      height: 10px;
+    }
+
+    &:nth-child(2) {
+      height: 18px;
+    }
+
+    &:nth-child(3) {
+      height: 13px;
+    }
+  }
+}
+
+.brand-name {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+
+  span {
+    color: $lemon;
+  }
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  border: 0;
+  border-radius: $radius-sm;
+  padding: 0 18px;
+  background: transparent;
+  color: #c3ccda;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.3s ease-in;
+
+  &:hover {
+    color: $white;
+    background: rgba($white, 0.08);
+  }
+
+  &.is-active {
+    color: $navy;
+    background: $lemon;
+  }
+}
+
+.cart-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba($white, 0.18);
+  font-size: 12px;
+
+  .is-active & {
+    background: rgba($navy, 0.12);
+  }
+}
+
+.header-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #aeb9c9;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.menu-toggle {
+  display: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: $radius-sm;
+  background: rgba($white, 0.08);
+  color: $white;
+}
+
+@include tablet {
+  .header-note {
+    display: none;
+  }
+}
+
+@include mobile {
+  .menu-toggle {
+    display: grid;
+    margin-left: auto;
+  }
+
+  .main-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 12px 20px 20px;
+    background: $navy;
+    border-top: 1px solid rgba($white, 0.1);
+    box-shadow: 0 20px 40px rgba($navy, 0.3);
+
+    .is-menu-open & {
+      display: flex;
+    }
+  }
+
+  .nav-link {
+    min-height: 52px;
+    font-size: 16px;
+  }
+}
