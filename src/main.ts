@@ -1,21 +1,17 @@
 import './styles/main.scss';
 
 import { store } from './state/store';
-import type { PageId } from './types/store';
+import { DISTRICTS, type PageId } from './types/store';
 import { renderFooter } from './ui/components/footer';
 import { renderHeader } from './ui/components/header';
 import { escapeHtml } from './ui/escapeHtml';
+import { renderAboutPage } from './ui/pages/aboutPage';
+import { listings } from './data/listings';
 
 const PAGE_STUBS: Record<
-  PageId,
+  Exclude<PageId, 'about'>,
   { title: string; description: string; nextPage: PageId; cta: string }
 > = {
-  about: {
-    title: 'О платформе BatumiLeads',
-    description: 'Стартовый раздел «О нас» будет реализован в задаче 2.2.',
-    nextPage: 'catalog',
-    cta: 'Перейти в каталог',
-  },
   catalog: {
     title: 'Каталог объектов Батуми',
     description: 'Карточки лидов, поиск и фильтры будут реализованы в задачах 3.1 и 3.2.',
@@ -43,7 +39,15 @@ function isPageId(value: string | undefined): value is PageId {
   return value === 'about' || value === 'catalog' || value === 'cart';
 }
 
-function renderPageStub(page: PageId): string {
+function renderPage(page: PageId): string {
+  if (page === 'about') {
+    return renderAboutPage({
+      listingsCount: listings.length,
+      sourcesCount: new Set(listings.map((item) => item.source)).size,
+      districtsCount: DISTRICTS.length,
+    });
+  }
+
   const stub = PAGE_STUBS[page];
 
   return `
@@ -64,7 +68,7 @@ function render(): void {
 
   app.innerHTML = `
     ${renderHeader(state.currentPage, cartCount, isMenuOpen)}
-    ${renderPageStub(state.currentPage)}
+    ${renderPage(state.currentPage)}
     ${renderFooter()}
   `;
 }
