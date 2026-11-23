@@ -16,7 +16,7 @@ export function renderFooter(): string {
 
         <nav class="footer-column" aria-label="Разделы сайта">
           <h2>Разделы</h2>
-          <button type="button" data-page="about">О платформе</button>
+          <button type="button" data-page="about">О нас</button>
           <button type="button" data-page="catalog">Каталог</button>
           <button type="button" data-page="cart">Корзина</button>
         </nav>
