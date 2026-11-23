@@ -1,13 +1,6 @@
 const RS_SCHOOL_URL = 'https://rs.school';
 
-const RS_SCHOOL_BADGE = `
-  <svg width="88" height="32" viewBox="0 0 88 32" fill="none" aria-hidden="true">
-    <rect x="1" y="1" width="86" height="30" rx="6" fill="#101d36"/>
-    <text x="44" y="21" text-anchor="middle" fill="#eef5ae"
-      font-family="Manrope, Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="0.5">
-      RS SCHOOL
-    </text>
-  </svg>`;
+import RS_SCHOOL_BADGE from '../../assets/rs-school-logo.svg?raw';
 
 export function renderFooter(): string {
   return `
@@ -23,7 +16,7 @@ export function renderFooter(): string {
 
         <nav class="footer-column" aria-label="Разделы сайта">
           <h2>Разделы</h2>
-          <button type="button" data-page="about">О платформе</button>
+          <button type="button" data-page="about">О нас</button>
           <button type="button" data-page="catalog">Каталог</button>
           <button type="button" data-page="cart">Корзина</button>
         </nav>
@@ -41,7 +34,7 @@ export function renderFooter(): string {
             aria-label="RS School — открыть сайт курса">
             ${RS_SCHOOL_BADGE}
           </a>
-          <p>Сделан в рамках курса RS School.</p>
+          <p>Сделан в рамках курса JS FullStack.</p>
         </div>
       </div>
 

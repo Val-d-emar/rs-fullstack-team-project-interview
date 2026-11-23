@@ -20,7 +20,7 @@ export function renderHeader(activePage: PageId, cartCount: number, isMenuOpen: 
       </a>
 
       <nav class="main-nav" id="main-nav" aria-label="Основная навигация">
-        ${renderNavLink(activePage, 'about', 'О платформе')}
+        ${renderNavLink(activePage, 'about', 'О нас')}
         ${renderNavLink(activePage, 'catalog', 'Каталог')}
         ${renderNavLink(
           activePage,
