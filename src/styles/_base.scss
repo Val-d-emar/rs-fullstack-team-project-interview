@@ -1,0 +1,152 @@
+@use 'variables' as *;
+
+:root {
+  --focus: #{$navy};
+  font-family: $font;
+  font-size: 15px;
+  line-height: 1.5;
+  color: $ink;
+  background: $paper;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: $header-height + 16px;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: $paper;
+
+  &.is-modal-open {
+    overflow: hidden;
+  }
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+ul,
+dl {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.site-header,
+.site-footer,
+.metrics-strip,
+.closing-cta,
+.feature-card-dark {
+  --focus: #{$lemon};
+}
+
+.page {
+  flex: 1;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 64px) 88px;
+}
+
+.shell-stub {
+  margin-top: 48px;
+  padding: 48px 32px;
+  border: 1px solid $line;
+  border-radius: $radius-lg;
+  background: $white;
+
+  h1 {
+    color: $navy;
+    font-size: clamp(28px, 4vw, 42px);
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin-top: 12px;
+    color: $muted;
+    max-width: 520px;
+  }
+
+  .button {
+    margin-top: 24px;
+  }
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a9c77e;
+  display: inline-block;
+  box-shadow: 0 0 0 4px rgba(169, 199, 126, 0.2);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.pill-dark {
+  background: rgba(16, 29, 54, 0.9);
+  color: $white;
+}
+
+.pill-lemon {
+  background: $lemon;
+  color: $navy;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
