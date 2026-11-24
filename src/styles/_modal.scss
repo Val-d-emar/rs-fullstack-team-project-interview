@@ -1,0 +1,395 @@
+@use 'variables' as *;
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba($navy, 0.6);
+  backdrop-filter: blur(4px);
+  animation: fade-in 0.2s ease-out;
+}
+
+.modal {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  width: min(1080px, 100%);
+  height: min(680px, 100%);
+  overflow: hidden;
+  border-radius: $radius-lg;
+  background: $white;
+  box-shadow: $shadow-lg;
+  animation: modal-in 0.25s ease-out;
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: $white;
+  color: $navy;
+  box-shadow: 0 4px 16px rgba($navy, 0.18);
+  transition: background 0.2s;
+
+  &:hover {
+    background: $lemon;
+  }
+}
+
+/* Галерея */
+.gallery {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: $navy;
+}
+
+.gallery-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.gallery-track {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.gallery-slide {
+  flex: 0 0 100%;
+  height: 100%;
+  margin: 0;
+  scroll-snap-align: center;
+  background: $navy-soft;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.gallery-nav {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba($white, 0.92);
+  color: $navy;
+  transform: translateY(-50%);
+  transition: background 0.2s;
+
+  &:hover {
+    background: $lemon;
+  }
+}
+
+.gallery-prev {
+  left: 14px;
+}
+
+.gallery-next {
+  right: 14px;
+}
+
+.gallery-counter {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba($navy, 0.85);
+  color: $white;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gallery-thumbs {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.gallery-thumb {
+  flex: 0 0 92px;
+  height: 64px;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: $navy-soft;
+  opacity: 0.6;
+  transition:
+    opacity 0.2s,
+    border-color 0.2s;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &.is-active {
+    border-color: $lemon;
+    opacity: 1;
+  }
+}
+
+.modal-info {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  --focus: #{$navy};
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 32px 24px;
+
+  h2 {
+    margin-top: 14px;
+    padding-right: 40px;
+    color: $navy;
+    font-size: 26px;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+  }
+
+  h3 {
+    margin: 26px 0 10px;
+    color: $navy;
+    font-size: 16px;
+    font-weight: 800;
+  }
+}
+
+.modal-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-right: 48px;
+}
+
+.modal-id {
+  color: $subtle;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.modal-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: $olive;
+  font-weight: 700;
+}
+
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  margin-top: 22px;
+  overflow: hidden;
+  border: 1px solid $line;
+  border-radius: $radius;
+  background: $line;
+
+  > div {
+    padding: 14px 16px;
+    background: $white;
+  }
+
+  dt {
+    color: $muted;
+    font-size: 12px;
+  }
+
+  dd {
+    margin: 4px 0 0;
+    color: $navy;
+    font-size: 15px;
+    font-weight: 800;
+  }
+}
+
+.modal-text {
+  color: $muted;
+  line-height: 1.75;
+}
+
+.feature-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: $lemon-soft;
+    border: 1px solid #ecf1c0;
+    color: $navy;
+    font-size: 13px;
+    font-weight: 700;
+  }
+}
+
+.contact-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 26px;
+  padding: 16px 18px;
+  border: 1.5px dashed #c9d1b8;
+  border-radius: $radius;
+  background: $paper;
+
+  strong {
+    display: block;
+    color: $navy;
+    font-size: 18px;
+    letter-spacing: 0.02em;
+  }
+
+  small {
+    display: block;
+    margin-top: 2px;
+    color: $muted;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+}
+
+.contact-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: $navy;
+  color: $lemon;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 18px 32px;
+  border-top: 1px solid $line;
+  background: $white;
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+
+@include tablet {
+  .modal {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 0.8fr) minmax(0, 1fr);
+    height: min(780px, 100%);
+    width: min(640px, 100%);
+  }
+}
+
+@include mobile {
+  .modal-backdrop {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .modal {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    border-radius: 0;
+  }
+
+  .gallery-stage {
+    height: 62vw;
+    max-height: 340px;
+  }
+
+  .modal-info {
+    display: block;
+  }
+
+  .modal-body {
+    overflow: visible;
+    padding: 24px 20px;
+
+    h2 {
+      font-size: 22px;
+    }
+  }
+
+  .spec-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .modal-footer {
+    position: sticky;
+    bottom: 0;
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -10px 30px rgba($navy, 0.08);
+  }
+
+  .modal-actions {
+    flex: 1;
+    justify-content: flex-end;
+  }
+}
