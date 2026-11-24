@@ -1,4 +1,4 @@
-import { ALL_DISTRICTS } from '../types/store';
+import { createDefaultFilters } from '../domain/filterListings';
 import type { CartItem, FilterState, PageId } from '../types/store';
 import { getDefaultStorage, loadCart, loadPromoCode, saveCart, savePromoCode } from './storage';
 import type { StorageLike } from './storage';
@@ -11,16 +11,6 @@ export interface AppState {
 }
 
 export type StoreListener = (state: AppState) => void;
-
-export function createDefaultFilters(): FilterState {
-  return {
-    search: '',
-    district: ALL_DISTRICTS,
-    minPrice: null,
-    maxPrice: null,
-    sort: 'default',
-  };
-}
 
 export function createStore(storage: StorageLike | null = getDefaultStorage()) {
   let currentPage: PageId = 'about';
