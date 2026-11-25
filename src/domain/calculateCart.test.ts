@@ -197,6 +197,110 @@ describe('calculateCartTotals: граничные случаи', () => {
   });
 });
 
+describe('calculateLineTotal: валидация входных данных', () => {
+  it('возвращает 0 при нулевом количестве', () => {
+    expect(calculateLineTotal(makeItem(100, 0))).toBe(0);
+  });
+
+  it('возвращает 0 при отрицательном количестве', () => {
+    expect(calculateLineTotal(makeItem(100, -1))).toBe(0);
+  });
+
+  //возвращает 0 при дробном количестве
+
+  it('возвращает 0 при NaN в количестве', () => {
+    expect(calculateLineTotal(makeItem(100, Number.NaN))).toBe(0);
+  });
+
+  it('возвращает 0 при Infinity в количестве', () => {
+    expect(calculateLineTotal(makeItem(100, Infinity))).toBe(0);
+  });
+
+  it('возвращает 0 при отрицательной цене', () => {
+    expect(calculateLineTotal(makeItem(-100, 2))).toBe(0);
+  });
+
+  it('возвращает 0 при NaN в цене', () => {
+    expect(calculateLineTotal(makeItem(Number.NaN, 2))).toBe(0);
+  });
+
+  it('возвращает 0 при Infinity в цене', () => {
+    expect(calculateLineTotal(makeItem(Infinity, 2))).toBe(0);
+  });
+
+  it('допускает нулевую цену', () => {
+    expect(calculateLineTotal(makeItem(0, 2))).toBe(0);
+  });
+});
+
+describe('calculateCartTotals: валидация входных данных', () => {
+  it('игнорирует невалидное количество при расчёте itemCount и subtotal', () => {
+    const items = [
+      makeItem(100, 2, 'A'),
+      makeItem(200, 0, 'B'),
+      makeItem(300, -1, 'C'),
+      makeItem(400, 1.5, 'D'),
+      makeItem(500, Number.NaN, 'E'),
+    ];
+
+    const result = calculateCartTotals(items, '', []);
+
+    expect(result.itemCount).toBe(2);
+    expect(result.subtotal).toBe(200);
+    expect(result.discount).toBe(0);
+    expect(result.total).toBe(200);
+  });
+
+  it('игнорирует невалидные цены, не ломая остальные позиции', () => {
+    const items = [
+      makeItem(100, 2, 'A'),
+      makeItem(-50, 1, 'B'),
+      makeItem(Number.NaN, 3, 'C'),
+      makeItem(Infinity, 1, 'D'),
+      makeItem(50, 2, 'E'),
+    ];
+
+    const result = calculateCartTotals(items, '', []);
+
+    expect(result.itemCount).toBe(9);
+    expect(result.subtotal).toBe(300);
+    expect(result.total).toBe(300);
+  });
+
+  it('корректно рассчитывает скидку при наличии невалидных позиций', () => {
+    const items = [makeItem(100, 2, 'A'), makeItem(Number.NaN, 1, 'B'), makeItem(-50, 1, 'C')];
+
+    const result = calculateCartTotals(items, 'SALE10', rules);
+
+    expect(result.itemCount).toBe(4);
+    expect(result.subtotal).toBe(200);
+    expect(result.discount).toBe(20);
+    expect(result.total).toBe(180);
+    expect(result.promoStatus).toBe('applied');
+  });
+});
+
+describe('calculateCartTotals: округление денежных значений', () => {
+  it('корректно округляет 1.005 до 1.01 в минимальных единицах', () => {
+    expect(calculateLineTotal(makeItem(1.005, 1))).toBe(1.01);
+  });
+
+  it('корректно обрабатывает 0.1 + 0.2', () => {
+    const price = 0.1 + 0.2;
+
+    expect(calculateLineTotal(makeItem(price, 1))).toBe(0.3);
+  });
+
+  it('корректно рассчитывает сумму нескольких дробных позиций', () => {
+    const items = [makeItem(0.1, 3, 'A'), makeItem(0.2, 2, 'B'), makeItem(1.005, 1, 'C')];
+
+    const result = calculateCartTotals(items, '', []);
+
+    expect(result.subtotal).toBe(1.71);
+    expect(result.total).toBe(1.71);
+  });
+});
+
 describe('toPromoRuleList', () => {
   it('превращает PROMO_RULES в список правил', () => {
     expect(toPromoRuleList({ SALE10: 10, HALF: 50 })).toEqual([

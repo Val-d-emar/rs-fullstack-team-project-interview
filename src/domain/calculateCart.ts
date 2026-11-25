@@ -8,7 +8,8 @@ import type {
 
 const MINOR_UNITS_PER_MAJOR = 100;
 
-const toMinor = (value: number): number => Math.round(value * MINOR_UNITS_PER_MAJOR);
+const toMinor = (value: number): number =>
+  Math.round((value + Number.EPSILON) * MINOR_UNITS_PER_MAJOR);
 const fromMinor = (value: number): number => value / MINOR_UNITS_PER_MAJOR;
 
 export function normalizePromoCode(code: string): string {
@@ -27,8 +28,19 @@ export function toPromoRuleList(rules: PromoRules): PromoRule[] {
   return Object.entries(rules).map(([code, discountPercent]) => ({ code, discountPercent }));
 }
 
+function checkQuantity(quantity: number): number {
+  return Number.isInteger(quantity) && quantity > 0 ? quantity : 0;
+}
+
+function checkPrice(price: number): number {
+  return Number.isFinite(price) && price >= 0 ? price : 0;
+}
+
 function calculateLineMinor(item: CartDetailItem): number {
-  return toMinor(item.listing.price) * item.quantity;
+  const quantity = checkQuantity(item.quantity);
+  const price = checkPrice(item.listing.price);
+
+  return toMinor(price) * quantity;
 }
 
 export function calculateLineTotal(item: CartDetailItem): number {
@@ -40,7 +52,7 @@ export function calculateCartTotals(
   promoCode: string,
   promoRules: readonly PromoRule[],
 ): CartTotals {
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const itemCount = items.reduce((sum, item) => sum + checkQuantity(item.quantity), 0);
   const subtotalMinor = items.reduce((sum, item) => sum + calculateLineMinor(item), 0);
 
   const code = normalizePromoCode(promoCode);
