@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
+import { PROMO_RULES } from '../data/promos';
 import type { CartDetailItem, Listing, PromoRule } from '../types/store';
-import { calculateCartTotals, calculateLineTotal, normalizePromoCode } from './calculateCart';
+import {
+  calculateCartTotals,
+  calculateLineTotal,
+  normalizePromoCode,
+  toPromoRuleList,
+} from './calculateCart';
 
 function makeListing(overrides: Partial<Listing> = {}): Listing {
   return {
@@ -137,5 +143,72 @@ describe('calculateCartTotals: промокод', () => {
 describe('normalizePromoCode', () => {
   it('обрезает пробелы и приводит к верхнему регистру', () => {
     expect(normalizePromoCode('  sale10 ')).toBe('SALE10');
+  });
+});
+
+describe('calculateCartTotals: граничные случаи', () => {
+  it('округляет скидку до тетри: 10.05 * 10% = 1.005 -> 1.01', () => {
+    const result = calculateCartTotals([makeItem(10.05, 1)], 'SALE10', rules);
+
+    expect(result.discount).toBe(1.01);
+    expect(result.total).toBe(9.04);
+  });
+
+  it('даёт точный итог на дробных суммах: 33.33 * 3 со скидкой 10%', () => {
+    const result = calculateCartTotals([makeItem(33.33, 3)], 'SALE10', rules);
+
+    expect(result.subtotal).toBe(99.99);
+    expect(result.discount).toBe(10);
+    expect(result.total).toBe(89.99);
+  });
+
+  it('считает правило с процентом вне 0-100 или NaN невалидным', () => {
+    const broken: readonly PromoRule[] = [
+      { code: 'OVER', discountPercent: 150 },
+      { code: 'NEG', discountPercent: -20 },
+      { code: 'BAD', discountPercent: Number.NaN },
+    ];
+
+    for (const code of ['OVER', 'NEG', 'BAD']) {
+      const result = calculateCartTotals([makeItem(100, 1)], code, broken);
+
+      expect(result.promoStatus).toBe('invalid');
+      expect(result.discount).toBe(0);
+      expect(result.total).toBe(100);
+    }
+  });
+
+  it('допускает граничные проценты 0 и 100', () => {
+    const edge: readonly PromoRule[] = [
+      { code: 'ZERO', discountPercent: 0 },
+      { code: 'FREE', discountPercent: 100 },
+    ];
+
+    expect(calculateCartTotals([makeItem(100, 1)], 'ZERO', edge).total).toBe(100);
+    expect(calculateCartTotals([makeItem(100, 1)], 'FREE', edge).total).toBe(0);
+  });
+
+  it('не мутирует входные данные', () => {
+    const items = Object.freeze([Object.freeze({ ...makeItem(10, 2) })]);
+    const frozenRules = Object.freeze([Object.freeze({ code: 'SALE10', discountPercent: 10 })]);
+
+    expect(() => calculateCartTotals(items, 'SALE10', frozenRules)).not.toThrow();
+    expect(items[0]?.quantity).toBe(2);
+  });
+});
+
+describe('toPromoRuleList', () => {
+  it('превращает PROMO_RULES в список правил', () => {
+    expect(toPromoRuleList({ SALE10: 10, HALF: 50 })).toEqual([
+      { code: 'SALE10', discountPercent: 10 },
+      { code: 'HALF', discountPercent: 50 },
+    ]);
+  });
+
+  it('работает с реальными промокодами проекта', () => {
+    const result = calculateCartTotals([makeItem(100, 1)], 'agent10', toPromoRuleList(PROMO_RULES));
+
+    expect(result.promoStatus).toBe('applied');
+    expect(result.total).toBe(90);
   });
 });

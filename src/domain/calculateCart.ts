@@ -1,4 +1,10 @@
-import type { CartDetailItem, CartTotals, PromoRule, PromoStatus } from '../types/store';
+import type {
+  CartDetailItem,
+  CartTotals,
+  PromoRule,
+  PromoRules,
+  PromoStatus,
+} from '../types/store';
 
 const MINOR_UNITS_PER_MAJOR = 100;
 
@@ -7,6 +13,18 @@ const fromMinor = (value: number): number => value / MINOR_UNITS_PER_MAJOR;
 
 export function normalizePromoCode(code: string): string {
   return code.trim().toUpperCase();
+}
+
+function isValidRule(rule: PromoRule): boolean {
+  return (
+    Number.isFinite(rule.discountPercent) &&
+    rule.discountPercent >= 0 &&
+    rule.discountPercent <= 100
+  );
+}
+
+export function toPromoRuleList(rules: PromoRules): PromoRule[] {
+  return Object.entries(rules).map(([code, discountPercent]) => ({ code, discountPercent }));
 }
 
 function calculateLineMinor(item: CartDetailItem): number {
@@ -29,7 +47,9 @@ export function calculateCartTotals(
   const rule =
     code === ''
       ? undefined
-      : promoRules.find((candidate) => normalizePromoCode(candidate.code) === code);
+      : promoRules.find(
+          (candidate) => isValidRule(candidate) && normalizePromoCode(candidate.code) === code,
+        );
 
   const promoStatus: PromoStatus = code === '' ? 'none' : rule ? 'applied' : 'invalid';
   const discountPercent = rule?.discountPercent ?? 0;
