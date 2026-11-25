@@ -8,8 +8,13 @@ import type {
 
 const MINOR_UNITS_PER_MAJOR = 100;
 
-const toMinor = (value: number): number =>
-  Math.round((value + Number.EPSILON) * MINOR_UNITS_PER_MAJOR);
+const toMinor = (value: number): number => {
+  const scaledValue = value * MINOR_UNITS_PER_MAJOR;
+  const epsilon = Number.EPSILON * Math.abs(scaledValue);
+
+  return Math.round(scaledValue + epsilon);
+};
+
 const fromMinor = (value: number): number => value / MINOR_UNITS_PER_MAJOR;
 
 export function normalizePromoCode(code: string): string {
@@ -25,15 +30,22 @@ function isValidRule(rule: PromoRule): boolean {
 }
 
 export function toPromoRuleList(rules: PromoRules): PromoRule[] {
-  return Object.entries(rules).map(([code, discountPercent]) => ({ code, discountPercent }));
+  return Object.entries(rules).map(([code, discountPercent]) => ({
+    code,
+    discountPercent,
+  }));
 }
 
 function checkQuantity(quantity: number): number {
   return Number.isInteger(quantity) && quantity > 0 ? quantity : 0;
 }
 
+function isValidPrice(price: number): boolean {
+  return Number.isFinite(price) && price >= 0;
+}
+
 function checkPrice(price: number): number {
-  return Number.isFinite(price) && price >= 0 ? price : 0;
+  return isValidPrice(price) ? price : 0;
 }
 
 function calculateLineMinor(item: CartDetailItem): number {
@@ -52,10 +64,14 @@ export function calculateCartTotals(
   promoCode: string,
   promoRules: readonly PromoRule[],
 ): CartTotals {
-  const itemCount = items.reduce((sum, item) => sum + checkQuantity(item.quantity), 0);
-  const subtotalMinor = items.reduce((sum, item) => sum + calculateLineMinor(item), 0);
+  const validItems = items.filter((item) => isValidPrice(item.listing.price));
+
+  const itemCount = validItems.reduce((sum, item) => sum + checkQuantity(item.quantity), 0);
+
+  const subtotalMinor = validItems.reduce((sum, item) => sum + calculateLineMinor(item), 0);
 
   const code = normalizePromoCode(promoCode);
+
   const rule =
     code === ''
       ? undefined
@@ -64,7 +80,9 @@ export function calculateCartTotals(
         );
 
   const promoStatus: PromoStatus = code === '' ? 'none' : rule ? 'applied' : 'invalid';
+
   const discountPercent = rule?.discountPercent ?? 0;
+
   const discountMinor = Math.round((subtotalMinor * discountPercent) / 100);
 
   return {
