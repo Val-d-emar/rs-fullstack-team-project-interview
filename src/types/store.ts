@@ -56,6 +56,16 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface PromoRule {
+  code: string;
+  discountPercent: number;
+}
+
+export interface CartDetailItem {
+  listing: Listing;
+  quantity: number;
+}
+
 export interface CartTotals {
   itemCount: number;
   subtotal: number;
