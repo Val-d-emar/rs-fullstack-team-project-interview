@@ -295,6 +295,11 @@ function handleClick(event: MouseEvent): void {
     return;
   }
 
+  if (target.closest('[data-demo-checkout]')) {
+    alert('Оформление заказа скоро станет доступно! Мы уже работаем над этой функцией.');
+    return;
+  }
+
   if (target.closest('[data-reset-filters]')) {
     store.resetFilters();
     return;
@@ -383,6 +388,22 @@ function handleImageError(event: Event): void {
   }
 }
 
+function handleSubmit(event: SubmitEvent): void {
+  const target = event.target;
+
+  if (!(target instanceof HTMLFormElement)) return;
+  if (!target.matches('[data-promo-form]')) return;
+
+  event.preventDefault();
+
+  const input = target.querySelector<HTMLInputElement>('#promo-input');
+
+  if (input) {
+    store.applyPromoCode(input.value);
+  }
+}
+
+app.addEventListener('submit', handleSubmit);
 store.subscribe(render);
 app.addEventListener('click', handleClick);
 modalRoot.addEventListener('click', handleClick);

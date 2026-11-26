@@ -21,7 +21,7 @@
 
 .cart-row {
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr) auto auto;
+  grid-template-columns: 112px minmax(0, 1fr) auto minmax(80px, auto) 36px;
   align-items: center;
   gap: 18px;
   padding: 18px;

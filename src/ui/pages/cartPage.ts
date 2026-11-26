@@ -8,7 +8,7 @@ import {
   calculateLineTotal,
   toPromoRuleList,
 } from '../../domain/calculateCart';
-import type { CartDetailItem, CartItem, Listing } from '../../types/store';
+import type { CartDetailItem, CartItem, Listing, PromoStatus } from '../../types/store';
 
 export interface CartPageData {
   listings: readonly Listing[];
@@ -100,10 +100,7 @@ function renderCartRow(item: Listing, quantity: number): string {
   `;
 }
 
-function renderPromoMessage(
-  promoStatus: 'none' | 'applied' | 'invalid',
-  discountPercent: number,
-): string {
+function renderPromoMessage(promoStatus: PromoStatus, discountPercent: number): string {
   if (promoStatus === 'applied') {
     return `
       <p class="promo-success" role="status">
@@ -133,7 +130,7 @@ function renderSummary(promoCode: string, totals: ReturnType<typeof calculateCar
       <div class="promo-box">
         <label for="promo-input">Промокод</label>
 
-        <div class="promo-row">
+        <form class="promo-row" data-promo-form>
           <input
             id="promo-input"
             type="text"
@@ -145,7 +142,7 @@ function renderSummary(promoCode: string, totals: ReturnType<typeof calculateCar
           <button type="button" data-apply-promo>
             Применить
           </button>
-        </div>
+        </form>
 
         ${renderPromoMessage(totals.promoStatus, totals.discountPercent)}
 
