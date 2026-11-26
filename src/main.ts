@@ -9,18 +9,11 @@ import type { DistrictFilter, PageId, SortOption } from './types/store';
 import { renderFooter } from './ui/components/footer';
 import { renderHeader } from './ui/components/header';
 import { renderListingModal, renderModalFooter } from './ui/components/listingModal';
-import { escapeHtml } from './ui/escapeHtml';
 import { getCurrentIndex, goToSlide, syncGallery } from './ui/galleryControls';
 import { renderAboutPage } from './ui/pages/aboutPage';
 import { renderCatalogPage } from './ui/pages/catalogPage';
+import { renderCartPage } from './ui/pages/cartPage';
 import type { SelectId } from './ui/pages/catalogPage';
-
-const CART_STUB = {
-  title: 'Корзина доступов',
-  description: 'Список выбранных контактов и промокоды будут реализованы в задачах 4.1 и 4.2.',
-  nextPage: 'about' as PageId,
-  cta: 'Вернуться на главную',
-};
 
 const appElement = document.querySelector<HTMLDivElement>('#app');
 
@@ -75,16 +68,11 @@ function renderPage(state: AppState): string {
       });
 
     case 'cart':
-      return `
-        <main class="page">
-          <section class="shell-stub">
-            <h1>${escapeHtml(CART_STUB.title)}</h1>
-            <p>${escapeHtml(CART_STUB.description)}</p>
-            <button class="button button-lemon" type="button" data-page="${CART_STUB.nextPage}">
-              ${escapeHtml(CART_STUB.cta)}
-            </button>
-          </section>
-        </main>`;
+      return renderCartPage({
+        listings,
+        items: state.cart,
+        promoCode: state.promoCode,
+      });
   }
 }
 
@@ -269,6 +257,41 @@ function handleClick(event: MouseEvent): void {
   if (addButton?.dataset.add) {
     store.addToCart(addButton.dataset.add);
     refreshModalFooter();
+    return;
+  }
+
+  const quantityButton = target.closest<HTMLButtonElement>('[data-qty]');
+
+  if (quantityButton) {
+    const id = quantityButton.dataset.qty;
+    const delta = Number(quantityButton.dataset.delta);
+
+    if (id && (delta === 1 || delta === -1)) {
+      store.updateQuantity(id, delta);
+    }
+
+    return;
+  }
+
+  const removeButton = target.closest<HTMLButtonElement>('[data-remove]');
+
+  if (removeButton?.dataset.remove) {
+    store.removeFromCart(removeButton.dataset.remove);
+    return;
+  }
+
+  if (target.closest('[data-apply-promo]')) {
+    const promoInput = document.querySelector<HTMLInputElement>('#promo-input');
+
+    if (promoInput) {
+      store.applyPromoCode(promoInput.value);
+    }
+
+    return;
+  }
+
+  if (target.closest('[data-reset-promo]')) {
+    store.clearPromoCode();
     return;
   }
 
