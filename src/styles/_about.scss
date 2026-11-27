@@ -334,6 +334,20 @@
   color: $lemon;
   font-size: 22px;
   font-weight: 800;
+  overflow: hidden;
+
+  img {
+    display: block;
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  // Буква остаётся под фото как запасной вариант, если аватарка не загрузилась
+  span {
+    grid-area: 1 / 1;
+  }
 }
 
 .team-role {

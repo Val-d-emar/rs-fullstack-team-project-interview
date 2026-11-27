@@ -19,13 +19,14 @@ const DEFAULT_TEAM: TeamMember[] = [
     name: 'Владимир',
     login: 'Val-d-emar',
     role: 'Frontend и архитектура',
-    contribution: 'Инфраструктура, архитектура приложения, хранилище состояния и базовый каркас.',
+    contribution:
+      'Инфраструктура, архитектура приложения, хранилище состояния, базовый каркас и каталог с фильтрами.',
   },
   {
     name: 'Анастасия',
     login: 'gor-anastasii',
     role: 'Frontend и UI/бизнес-логика',
-    contribution: 'Дизайн-система, каталог с фильтрами, корзина, промокоды и тестирование.',
+    contribution: 'Дизайн-система, корзина, промокоды и тестирование.',
   },
 ];
 
@@ -49,7 +50,10 @@ const SOURCES = ['ss.ge', 'korter.ge', 'Facebook', 'Ручной ввод'];
 function renderTeamCard(member: TeamMember): string {
   return `
     <article class="team-card">
-      <div class="team-avatar" aria-hidden="true">${escapeHtml(member.name.charAt(0))}</div>
+      <div class="team-avatar" aria-hidden="true">
+        <span>${escapeHtml(member.name.charAt(0))}</span>
+        <img src="https://github.com/${encodeURIComponent(member.login)}.png?size=112" alt="" width="56" height="56" loading="lazy">
+      </div>
       <div class="team-role">${escapeHtml(member.role)}</div>
       <h3>${escapeHtml(member.name)}</h3>
       <a href="https://github.com/${encodeURIComponent(member.login)}" target="_blank" rel="noreferrer">

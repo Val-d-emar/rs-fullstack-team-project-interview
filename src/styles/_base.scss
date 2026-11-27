@@ -66,6 +66,7 @@ dl {
 
 .icon {
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 :focus-visible {
