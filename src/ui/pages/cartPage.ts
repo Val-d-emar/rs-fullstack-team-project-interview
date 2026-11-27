@@ -3,42 +3,26 @@ import { icon } from '../icons';
 import { formatPrice } from '../components/listingCard';
 import { SOURCE_LABELS } from '../../data/catalogOptions';
 import { PROMO_RULES } from '../../data/promos';
-import {
-  calculateCartTotals,
-  calculateLineTotal,
-  toPromoRuleList,
-} from '../../domain/calculateCart';
-import type { CartDetailItem, CartItem, Listing, PromoStatus } from '../../types/store';
+import { calculateCartTotals, toPromoRuleList } from '../../domain/calculateCart';
+import type { Listing, PromoStatus } from '../../types/store';
 
 export interface CartPageData {
   listings: readonly Listing[];
-  items: readonly CartItem[];
+  cartIds: readonly string[];
   promoCode: string;
 }
 
-function getCartDetails(data: CartPageData): CartDetailItem[] {
-  return data.items.flatMap((line) => {
-    const listing = data.listings.find((item) => item.id === line.id);
+function getCartListings(data: CartPageData): Listing[] {
+  return data.cartIds.flatMap((id) => {
+    const listing = data.listings.find((item) => item.id === id);
 
-    if (!listing) return [];
-
-    return [
-      {
-        listing,
-        quantity: line.quantity,
-      },
-    ];
+    return listing ? [listing] : [];
   });
 }
 
-function renderCartRow(item: Listing, quantity: number): string {
+function renderCartRow(item: Listing): string {
   const id = escapeHtml(item.id);
   const cover = item.images[0];
-
-  const lineTotal = calculateLineTotal({
-    listing: item,
-    quantity,
-  });
 
   return `
     <article class="cart-row">
@@ -55,38 +39,11 @@ function renderCartRow(item: Listing, quantity: number): string {
 
         <h3>${escapeHtml(item.title)}</h3>
 
-        <small>
-          Доступ к контакту собственника ·
-          ${formatPrice(item.price)} ₾ / шт.
-        </small>
-      </div>
-
-      <div class="quantity-control"
-        role="group"
-        aria-label="Количество доступов">
-
-        <button
-          type="button"
-          data-qty="${id}"
-          data-delta="-1"
-          aria-label="Уменьшить количество"
-          ${quantity <= 1 ? 'disabled' : ''}>
-          ${icon('minus', 16)}
-        </button>
-
-        <b>${quantity}</b>
-
-        <button
-          type="button"
-          data-qty="${id}"
-          data-delta="1"
-          aria-label="Увеличить количество">
-          ${icon('plus', 16)}
-        </button>
+        <small>Доступ к контакту собственника</small>
       </div>
 
       <strong class="cart-line-price">
-        ${formatPrice(lineTotal)} ₾
+        ${formatPrice(item.price)} ₾
       </strong>
 
       <button
@@ -224,11 +181,11 @@ function renderEmptyCart(): string {
 }
 
 export function renderCartPage(data: CartPageData): string {
-  const details = getCartDetails(data);
+  const cartListings = getCartListings(data);
 
-  const totals = calculateCartTotals(details, data.promoCode, toPromoRuleList(PROMO_RULES));
+  const totals = calculateCartTotals(cartListings, data.promoCode, toPromoRuleList(PROMO_RULES));
 
-  const rows = details.map(({ listing, quantity }) => renderCartRow(listing, quantity)).join('');
+  const rows = cartListings.map(renderCartRow).join('');
 
   return `
     <main class="page cart-page">
@@ -239,14 +196,14 @@ export function renderCartPage(data: CartPageData): string {
         <p>
           ${
             totals.itemCount
-              ? `Доступов к контактам: ${totals.itemCount}. Проверьте список перед оформлением.`
+              ? `Контактов в корзине: ${totals.itemCount}. Проверьте список перед оформлением.`
               : 'Здесь появятся выбранные объекты.'
           }
         </p>
       </section>
 
       ${
-        details.length
+        cartListings.length
           ? `
           <div class="cart-layout">
 

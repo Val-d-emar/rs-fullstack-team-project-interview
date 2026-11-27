@@ -46,7 +46,6 @@
   }
 }
 
-/* Галерея */
 .gallery {
   display: flex;
   flex-direction: column;
@@ -315,6 +314,14 @@
   padding: 18px 32px;
   border-top: 1px solid $line;
   background: $white;
+}
+
+.modal-in-cart {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: $olive;
+  font-weight: 700;
 }
 
 .modal-actions {

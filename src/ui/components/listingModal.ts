@@ -59,7 +59,7 @@ export function renderModalFooter(item: Listing, inCart: boolean): string {
   const id = escapeHtml(item.id);
 
   const actions = inCart
-    ? `<button class="button button-ghost" type="button" data-add="${id}">${icon('plus', 18)} Ещё один доступ</button>
+    ? `<span class="modal-in-cart">${icon('check', 18)} В корзине</span>
        <button class="button button-lemon" type="button" data-page="cart">Открыть корзину ${icon('arrowRight', 18)}</button>`
     : `<button class="button button-dark button-large" type="button" data-add="${id}">${icon('cart', 18)} Добавить в корзину</button>`;
 

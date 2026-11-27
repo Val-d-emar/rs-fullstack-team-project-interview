@@ -51,19 +51,9 @@ export interface FilterState {
   sort: SortOption;
 }
 
-export interface CartItem {
-  id: string;
-  quantity: number;
-}
-
 export interface PromoRule {
   code: string;
   discountPercent: number;
-}
-
-export interface CartDetailItem {
-  listing: Listing;
-  quantity: number;
 }
 
 export interface CartTotals {

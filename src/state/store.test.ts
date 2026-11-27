@@ -38,7 +38,6 @@ describe('createStore', () => {
 
     first.setPage('cart');
     first.addToCart('BL001');
-    first.addToCart('BL001');
     first.addToCart('BL002');
     first.applyPromoCode(' sale10 ');
 
@@ -46,24 +45,38 @@ describe('createStore', () => {
     const state = restored.getState();
 
     expect(state.currentPage).toBe('about');
-    expect(state.cart).toEqual([
-      { id: 'BL001', quantity: 2 },
-      { id: 'BL002', quantity: 1 },
-    ]);
+    expect(state.cart).toEqual(['BL001', 'BL002']);
     expect(state.promoCode).toBe('SALE10');
   });
 
-  it('обновляет количество, не уменьшая его ниже 1, и удаляет элементы', () => {
+  it('не добавляет один и тот же лид дважды и не уведомляет подписчиков о дубликате', () => {
+    const appStore = createStore(createMemoryStorage());
+    const listener = vi.fn();
+
+    appStore.addToCart('BL001');
+    appStore.subscribe(listener);
+    appStore.addToCart('BL001');
+
+    expect(appStore.getState().cart).toEqual(['BL001']);
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it('игнорирует пустой id', () => {
+    const appStore = createStore(createMemoryStorage());
+
+    appStore.addToCart('   ');
+    expect(appStore.getState().cart).toEqual([]);
+  });
+
+  it('удаляет элементы из корзины', () => {
     const appStore = createStore(createMemoryStorage());
 
     appStore.addToCart('BL001');
-    appStore.updateQuantity('BL001', -1);
-    expect(appStore.getState().cart).toEqual([{ id: 'BL001', quantity: 1 }]);
-
-    appStore.updateQuantity('BL001', 2);
-    expect(appStore.getState().cart).toEqual([{ id: 'BL001', quantity: 3 }]);
-
+    appStore.addToCart('BL002');
     appStore.removeFromCart('BL001');
+    expect(appStore.getState().cart).toEqual(['BL002']);
+
+    appStore.removeFromCart('BL002');
     expect(appStore.getState().cart).toEqual([]);
   });
 

@@ -62,7 +62,7 @@ function renderPage(state: AppState): string {
       return renderCatalogPage({
         shown: filterAndSortListings(listings, state.filters),
         totalCount: listings.length,
-        cartIds: state.cart.map((item) => item.id),
+        cartIds: state.cart,
         filters: state.filters,
         openSelect,
       });
@@ -70,7 +70,7 @@ function renderPage(state: AppState): string {
     case 'cart':
       return renderCartPage({
         listings,
-        items: state.cart,
+        cartIds: state.cart,
         promoCode: state.promoCode,
       });
   }
@@ -92,7 +92,7 @@ function render(): void {
   const activeInputId = active instanceof HTMLInputElement ? active.id : '';
   const cursor =
     active instanceof HTMLInputElement && active.type !== 'number' ? active.selectionStart : null;
-  const cartCount = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = state.cart.length;
 
   app.innerHTML = `
     ${renderHeader(state.currentPage, cartCount, isMenuOpen)}
@@ -113,7 +113,7 @@ function openModal(id: string): void {
   if (!item) return;
 
   openListingId = id;
-  const inCart = store.getState().cart.some((line) => line.id === id);
+  const inCart = store.getState().cart.includes(id);
 
   modalRoot.innerHTML = renderListingModal(item, inCart);
   document.body.classList.add('is-modal-open');
@@ -139,7 +139,7 @@ function refreshModalFooter(): void {
   const footer = modalRoot.querySelector<HTMLElement>('#modal-footer');
   if (!item || !footer) return;
 
-  const inCart = store.getState().cart.some((line) => line.id === item.id);
+  const inCart = store.getState().cart.includes(item.id);
   footer.innerHTML = renderModalFooter(item, inCart);
 }
 
@@ -211,7 +211,7 @@ function parsePrice(value: string): number | null {
 
 function handleClick(event: MouseEvent): void {
   const target = event.target;
-  if (!(target instanceof HTMLElement)) return;
+  if (!(target instanceof Element)) return;
 
   const hadOpenSelect = openSelect !== null;
   if (hadOpenSelect && !target.closest('.custom-select')) {
@@ -260,20 +260,7 @@ function handleClick(event: MouseEvent): void {
     return;
   }
 
-  const quantityButton = target.closest<HTMLButtonElement>('[data-qty]');
-
-  if (quantityButton) {
-    const id = quantityButton.dataset.qty;
-    const delta = Number(quantityButton.dataset.delta);
-
-    if (id && (delta === 1 || delta === -1)) {
-      store.updateQuantity(id, delta);
-    }
-
-    return;
-  }
-
-  const removeButton = target.closest<HTMLButtonElement>('[data-remove]');
+  const removeButton = target.closest<HTMLElement>('[data-remove]');
 
   if (removeButton?.dataset.remove) {
     store.removeFromCart(removeButton.dataset.remove);
@@ -391,7 +378,7 @@ function handleImageError(event: Event): void {
 function handleSubmit(event: SubmitEvent): void {
   const target = event.target;
 
-  if (!(target instanceof HTMLFormElement)) return;
+  if (!(target instanceof Element)) return;
   if (!target.matches('[data-promo-form]')) return;
 
   event.preventDefault();

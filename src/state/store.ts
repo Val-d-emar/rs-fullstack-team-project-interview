@@ -1,12 +1,12 @@
 import { createDefaultFilters } from '../domain/filterListings';
-import type { CartItem, FilterState, PageId } from '../types/store';
+import type { FilterState, PageId } from '../types/store';
 import { getDefaultStorage, loadCart, loadPromoCode, saveCart, savePromoCode } from './storage';
 import type { StorageLike } from './storage';
 
 export interface AppState {
   currentPage: PageId;
   filters: FilterState;
-  cart: readonly CartItem[];
+  cart: readonly string[];
   promoCode: string;
 }
 
@@ -15,7 +15,7 @@ export type StoreListener = (state: AppState) => void;
 export function createStore(storage: StorageLike | null = getDefaultStorage()) {
   let currentPage: PageId = 'about';
   let filters: FilterState = createDefaultFilters();
-  let cart: CartItem[] = loadCart(storage);
+  let cart: string[] = loadCart(storage);
   let promoCode = loadPromoCode(storage);
 
   const listeners = new Set<StoreListener>();
@@ -24,7 +24,7 @@ export function createStore(storage: StorageLike | null = getDefaultStorage()) {
     return {
       currentPage,
       filters: { ...filters },
-      cart: cart.map((item) => ({ ...item })),
+      cart: [...cart],
       promoCode,
     };
   }
@@ -62,32 +62,16 @@ export function createStore(storage: StorageLike | null = getDefaultStorage()) {
   }
 
   function addToCart(id: string): void {
-    if (!id.trim()) return;
+    if (!id.trim() || cart.includes(id)) return;
 
-    const exists = cart.some((item) => item.id === id);
+    cart = [...cart, id];
 
-    cart = exists
-      ? cart.map((item) => (item.id === id ? { ...item, quantity: item.quantity + 1 } : item))
-      : [...cart, { id, quantity: 1 }];
-
-    saveCart(cart, storage);
-    notify();
-  }
-
-  function updateQuantity(id: string, delta: number): void {
-    const target = cart.find((item) => item.id === id);
-    if (!target) return;
-
-    const nextQuantity = Math.max(1, target.quantity + delta);
-    if (nextQuantity === target.quantity) return;
-
-    cart = cart.map((item) => (item.id === id ? { ...item, quantity: nextQuantity } : item));
     saveCart(cart, storage);
     notify();
   }
 
   function removeFromCart(id: string): void {
-    const nextCart = cart.filter((item) => item.id !== id);
+    const nextCart = cart.filter((item) => item !== id);
     if (nextCart.length === cart.length) return;
 
     cart = nextCart;
@@ -116,7 +100,6 @@ export function createStore(storage: StorageLike | null = getDefaultStorage()) {
     setFilters,
     resetFilters,
     addToCart,
-    updateQuantity,
     removeFromCart,
     applyPromoCode,
     clearPromoCode,
