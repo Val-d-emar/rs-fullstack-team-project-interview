@@ -25,7 +25,7 @@ describe('storage adapter', () => {
   it('возвращает пустые значения, когда хранилище равно null', () => {
     expect(loadCart(null)).toEqual([]);
     expect(loadPromoCode(null)).toBe('');
-    expect(() => saveCart([{ id: 'BL001', quantity: 1 }], null)).not.toThrow();
+    expect(() => saveCart(['BL001'], null)).not.toThrow();
     expect(() => savePromoCode('AGENT10', null)).not.toThrow();
   });
 
@@ -37,19 +37,32 @@ describe('storage adapter', () => {
     expect(loadCart(wrongType)).toEqual([]);
   });
 
-  it('фильтрует недопустимые элементы и объединяет дублирующиеся идентификаторы', () => {
+  it('фильтрует недопустимые элементы и убирает дублирующиеся идентификаторы', () => {
+    const raw = JSON.stringify(['BL001', 'BL001', 'BL002', '', '   ', 123, null, { id: 5 }]);
+    const storage = createMemoryStorage({ [CART_STORAGE_KEY]: raw });
+
+    expect(loadCart(storage)).toEqual(['BL001', 'BL002']);
+  });
+
+  it('мигрирует старый формат { id, quantity }: количество отбрасывается', () => {
     const raw = JSON.stringify([
-      { id: 'BL001', quantity: 2 },
+      { id: 'BL001', quantity: 3 },
       { id: 'BL001', quantity: 1 },
-      { id: 'BL002', quantity: 0 },
-      { id: 'BL003', quantity: 1.5 },
+      { id: 'BL002', quantity: 1 },
       { id: '', quantity: 2 },
-      { id: 123, quantity: 1 },
-      null,
     ]);
     const storage = createMemoryStorage({ [CART_STORAGE_KEY]: raw });
 
-    expect(loadCart(storage)).toEqual([{ id: 'BL001', quantity: 3 }]);
+    expect(loadCart(storage)).toEqual(['BL001', 'BL002']);
+  });
+
+  it('сохраняет и загружает корзину как список id', () => {
+    const storage = createMemoryStorage();
+
+    saveCart(['BL001', 'BL002'], storage);
+
+    expect(storage.getItem(CART_STORAGE_KEY)).toBe('["BL001","BL002"]');
+    expect(loadCart(storage)).toEqual(['BL001', 'BL002']);
   });
 
   it('нормализует промо-код при загрузке и сохранении', () => {
@@ -72,7 +85,7 @@ describe('storage adapter', () => {
 
     expect(loadCart(failingStorage)).toEqual([]);
     expect(loadPromoCode(failingStorage)).toBe('');
-    expect(() => saveCart([{ id: 'BL001', quantity: 1 }], failingStorage)).not.toThrow();
+    expect(() => saveCart(['BL001'], failingStorage)).not.toThrow();
     expect(() => savePromoCode('SALE10', failingStorage)).not.toThrow();
   });
 });

@@ -1,5 +1,3 @@
-import type { CartItem } from '../types/store';
-
 export type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
 
 export const CART_STORAGE_KEY = 'batumi-leads:cart';
@@ -15,21 +13,14 @@ export function getDefaultStorage(): StorageLike | null {
   }
 }
 
-function isValidCartItem(value: unknown): value is CartItem {
-  if (typeof value !== 'object' || value === null) return false;
+function extractCartId(entry: unknown): string | null {
+  const candidate =
+    typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>).id : entry;
 
-  const record = value as Record<string, unknown>;
-
-  return (
-    typeof record.id === 'string' &&
-    record.id.trim().length > 0 &&
-    typeof record.quantity === 'number' &&
-    Number.isInteger(record.quantity) &&
-    record.quantity >= 1
-  );
+  return typeof candidate === 'string' && candidate.trim().length > 0 ? candidate : null;
 }
 
-export function loadCart(storage: StorageLike | null = getDefaultStorage()): CartItem[] {
+export function loadCart(storage: StorageLike | null = getDefaultStorage()): string[] {
   if (!storage) return [];
 
   try {
@@ -39,29 +30,22 @@ export function loadCart(storage: StorageLike | null = getDefaultStorage()): Car
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
 
-    // Объединяем возможные дубликаты id, если данные в хранилище редактировались вручную
-    const merged = new Map<string, number>();
+    const ids = parsed.map(extractCartId).filter((id): id is string => id !== null);
 
-    for (const entry of parsed) {
-      if (isValidCartItem(entry)) {
-        merged.set(entry.id, (merged.get(entry.id) ?? 0) + entry.quantity);
-      }
-    }
-
-    return Array.from(merged, ([id, quantity]) => ({ id, quantity }));
+    return Array.from(new Set(ids));
   } catch {
     return [];
   }
 }
 
 export function saveCart(
-  items: readonly CartItem[],
+  ids: readonly string[],
   storage: StorageLike | null = getDefaultStorage(),
 ): void {
   if (!storage) return;
 
   try {
-    storage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    storage.setItem(CART_STORAGE_KEY, JSON.stringify(ids));
   } catch {
     // Игнорируем переполнение квоты или запрет записи в приватном режиме
   }
