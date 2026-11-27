@@ -6,7 +6,8 @@
 
 ## Ссылки
 
-- Деплой на Vercel: (добавить)
+- Деплой на Vercel: https://rs-fullstack-team-projec-git-20af5f-vladimirs-projects-0aed3f32.vercel.app/
+- Доска задач: https://github.com/users/Val-d-emar/projects/7
 
 ## Экраны
 
@@ -29,15 +30,30 @@ Node.js 20.19+ (рекомендуется актуальная LTS-версия
 ## Запуск
 
 ```bash
-npm i
+npm ci
 npm run dev
 ```
 
-`npm i` ставит зависимости строго по `package-lock.json`. `npm run dev` запускает dev-сервер Vite, адрес появится в терминале.
+`npm ci` ставит зависимости строго по `package-lock.json`. `npm run dev` запускает dev-сервер Vite, адрес появится в терминале.
 
 ## Проверки перед коммитом
 
 Husky запускает lint-staged на изменённых файлах: для `*.ts` выполняются ESLint и Prettier, для `*.scss`, `*.css`, `*.json`, `*.md`, `*.yml` и `*.html` — Prettier.
+
+## Скрипты
+
+| Команда                | Что делает                                                  |
+| ---------------------- | ----------------------------------------------------------- |
+| `npm run dev`          | Dev-сервер Vite с горячей перезагрузкой                     |
+| `npm run build`        | Проверка типов и production-сборка в `dist/`                |
+| `npm run preview`      | Локальный просмотр собранного проекта                       |
+| `npm test`             | Разовый прогон тестов Vitest                                |
+| `npm run typecheck`    | Проверка типов TypeScript без сборки                        |
+| `npm run lint`         | ESLint, предупреждения считаются ошибками                   |
+| `npm run lint:fix`     | ESLint с автоисправлением                                   |
+| `npm run format`       | Форматирование проекта Prettier                             |
+| `npm run format:check` | Проверка форматирования без изменений                       |
+| `npm run check`        | Типы, линтер, форматирование, тесты и сборка одной командой |
 
 ## Структура проекта
 
