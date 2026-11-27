@@ -92,7 +92,8 @@ function render(): void {
   const activeInputId = active instanceof HTMLInputElement ? active.id : '';
   const cursor =
     active instanceof HTMLInputElement && active.type !== 'number' ? active.selectionStart : null;
-  const cartCount = state.cart.length;
+  const knownIds = new Set(listings.map((item) => item.id));
+  const cartCount = state.cart.filter((id) => knownIds.has(id)).length;
 
   app.innerHTML = `
     ${renderHeader(state.currentPage, cartCount, isMenuOpen)}
@@ -305,7 +306,8 @@ function handleClick(event: MouseEvent): void {
   }
 
   const openTrigger = target.closest<HTMLElement>('[data-open]');
-  if (openTrigger?.dataset.open && !target.closest('button, a')) {
+  const interactive = target.closest('button, a');
+  if (openTrigger?.dataset.open && (!interactive || interactive === openTrigger)) {
     openModal(openTrigger.dataset.open);
     if (hadOpenSelect) render();
     return;
